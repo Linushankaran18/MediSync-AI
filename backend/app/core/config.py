@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     CLOUD_LLM_MODEL: str = "llama-3.3-70b-versatile"
     LLM_TEMPERATURE: float = 0.0
 
+    # Vision OCR: uploaded images (scanned/photographed prescriptions, lab
+    # reports) have no text layer for pypdf/pdfplumber to read, and classic
+    # OCR (Tesseract) handles handwriting and mixed-language text poorly. A
+    # vision-capable LLM transcribes the image directly instead.
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_VISION_MODEL: str = "claude-sonnet-5"
+
     # Embeddings / vector store
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
     CHROMA_PATH: str = "./chroma_data"

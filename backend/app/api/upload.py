@@ -14,7 +14,7 @@ from app.services import embedding_service, interaction_service, ocr_service, pa
 
 router = APIRouter(tags=["upload"])
 
-ALLOWED_EXTENSIONS = {".pdf", ".txt"}
+ALLOWED_EXTENSIONS = {".pdf", ".txt", ".png", ".jpg", ".jpeg"}
 
 
 @router.post("/upload", response_model=UploadResponse)
@@ -25,7 +25,10 @@ def upload_document(
 ):
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only PDF or .txt uploads are supported")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF, .txt, or image (.png/.jpg/.jpeg) uploads are supported",
+        )
 
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     stored_name = f"{uuid.uuid4()}{ext}"

@@ -53,12 +53,12 @@ export default function UploadPage() {
           dragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-white'
         }`}
       >
-        <p className="text-slate-600 mb-4">Drag & drop PDF files here</p>
+        <p className="text-slate-600 mb-4">Drag & drop PDF, image, or text files here</p>
         <label className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700">
           Browse Files
           <input
             type="file"
-            accept=".pdf"
+            accept=".pdf,.txt,.png,.jpg,.jpeg"
             multiple
             className="hidden"
             onChange={(e) => e.target.files && uploadFiles(e.target.files)}
