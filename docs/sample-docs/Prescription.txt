@@ -1,0 +1,12 @@
+Prescription
+============
+Patient: John Demo
+Doctor: Dr. Silva
+Hospital: City General Hospital
+Date: 2025-04-01
+
+Medications:
+- Amoxicillin 500mg, twice daily
+- Metformin 500mg, once daily
+
+Allergies noted in records: Penicillin

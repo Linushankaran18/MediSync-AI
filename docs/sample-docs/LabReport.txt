@@ -1,0 +1,10 @@
+Laboratory Report
+=================
+Patient: John Demo
+Doctor: Dr. Silva
+Date: 2025-05-15
+
+Results:
+- Blood Sugar (Fasting): 145 mg/dL (Reference: 70-100)
+- Total Cholesterol: 220 mg/dL (Reference: <200)
+- Creatinine: 1.1 mg/dL (Reference: 0.7-1.3)

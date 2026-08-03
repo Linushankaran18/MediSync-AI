@@ -1,0 +1,12 @@
+Discharge Summary
+=================
+Patient: John Demo
+Doctor: Dr. Silva
+Hospital: City General Hospital
+Date: 2025-06-01
+
+Diagnosis: Type 2 Diabetes, Hypertension
+Treatment: Continue Metformin 500mg daily
+Follow-up: Lab work in 6 weeks
+
+Patient advised to monitor blood sugar levels.

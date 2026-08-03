@@ -1,0 +1,12 @@
+Doctor Clinical Note
+====================
+Patient: John Demo
+Doctor: Dr. Silva
+Date: 2025-07-20
+
+Progress Note:
+Patient returns for follow-up. Blood sugar trending upward (120 -> 145 -> 170).
+Discussed dietary modifications and possible medication adjustment.
+Plan: Increase Metformin to 1000mg if next labs remain elevated.
+
+Current medications: Metformin 500mg, Amoxicillin 500mg (review allergy status)
