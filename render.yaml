@@ -18,10 +18,10 @@ services:
         sync: false
       - key: CLOUD_LLM_MODEL
         value: llama-3.3-70b-versatile
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: ANTHROPIC_VISION_MODEL
-        value: claude-sonnet-5
+      - key: GEMINI_VISION_MODEL
+        value: gemini-3.6-flash
       - key: CHROMA_PATH
         value: /app/data/chroma
       - key: UPLOAD_DIR

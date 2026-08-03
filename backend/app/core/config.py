@@ -24,14 +24,12 @@ class Settings(BaseSettings):
     CLOUD_LLM_MODEL: str = "llama-3.3-70b-versatile"
     LLM_TEMPERATURE: float = 0.0
 
-    # Vision OCR: uploaded images (scanned/photographed prescriptions, lab
-    # reports) have no text layer for pypdf/pdfplumber to read, and classic
-    # OCR (Tesseract) handles handwriting and mixed-language text poorly. A
-    # vision-capable LLM transcribes the image directly instead. Groq has no
-    # vision model available on this account (checked via /models - text/
-    # audio only), so this is a separate Anthropic key.
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_VISION_MODEL: str = "claude-sonnet-5"
+    # Vision OCR: uploaded images/scanned PDFs (no real text layer) go
+    # through Gemini, which transcribes the image directly - handles
+    # handwriting and mixed-language text far better than pypdf/pdfplumber
+    # or classic OCR.
+    GEMINI_API_KEY: str = ""
+    GEMINI_VISION_MODEL: str = "gemini-3.6-flash"
 
     # Embeddings / vector store
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"

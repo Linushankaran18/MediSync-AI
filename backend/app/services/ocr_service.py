@@ -1,17 +1,18 @@
 """Text extraction: pypdf primary, pdfplumber fallback for PDFs; plain .txt
-files are read directly (used by the demo sample docs). Scanned/photographed
-images (.png/.jpg/.jpeg) have no text layer for pypdf/pdfplumber to read, and
-classic OCR (Tesseract) handles handwriting and mixed-language text poorly -
-those go through a vision-capable LLM (Claude) that transcribes the image
-directly instead. (Groq was tried first since it's the same account as the
-main LLM, but Groq currently has no vision/multimodal model available - its
-/models list is text/audio only - so this uses a separate Anthropic key.)"""
+files are read directly (used by the demo sample docs). Neither library does
+true OCR - real-world uploads are frequently scanned/photographed documents
+with no text layer at all (a native image upload, or a PDF that's just a
+picture exported/printed to PDF, which looks identical to pypdf/pdfplumber:
+zero extractable text). Those go through Gemini (Google's vision-capable
+LLM), which transcribes the image directly instead."""
 import base64
+import io
 import logging
 import os
 
 import pdfplumber
-from anthropic import Anthropic
+import pypdfium2 as pdfium
+from google import genai
 from pypdf import PdfReader
 
 from app.core.config import settings
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 MIN_CHARS_PER_PAGE = 20
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 _MEDIA_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+MAX_VISION_PDF_PAGES = 5
 
 VISION_OCR_PROMPT = (
     "Transcribe every piece of text visible in this medical document image, "
@@ -30,44 +32,59 @@ VISION_OCR_PROMPT = (
     "Output only the transcribed text, with no summary, explanation, or commentary."
 )
 
-_anthropic_client: Anthropic | None = None
+_gemini_client: genai.Client | None = None
 
 
-def _get_anthropic_client() -> Anthropic:
-    global _anthropic_client
-    if _anthropic_client is None:
-        _anthropic_client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    return _anthropic_client
+def _get_gemini_client() -> genai.Client:
+    global _gemini_client
+    if _gemini_client is None:
+        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    return _gemini_client
+
+
+def _call_vision_model(image_bytes: bytes, mime_type: str) -> str:
+    client = _get_gemini_client()
+    interaction = client.interactions.create(
+        model=settings.GEMINI_VISION_MODEL,
+        input=[
+            {"type": "text", "text": VISION_OCR_PROMPT},
+            {
+                "type": "image",
+                "data": base64.b64encode(image_bytes).decode("utf-8"),
+                "mime_type": mime_type,
+            },
+        ],
+    )
+    return interaction.output_text or ""
 
 
 def _extract_with_vision(file_path: str) -> tuple[str, float]:
     ext = os.path.splitext(file_path)[1].lower()
     media_type = _MEDIA_TYPES.get(ext, "image/png")
     with open(file_path, "rb") as f:
-        image_b64 = base64.b64encode(f.read()).decode("utf-8")
-
-    client = _get_anthropic_client()
-    response = client.messages.create(
-        model=settings.ANTHROPIC_VISION_MODEL,
-        max_tokens=2000,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {"type": "base64", "media_type": media_type, "data": image_b64},
-                    },
-                    {"type": "text", "text": VISION_OCR_PROMPT},
-                ],
-            }
-        ],
-    )
-    text = "".join(block.text for block in response.content if block.type == "text")
+        image_bytes = f.read()
+    text = _call_vision_model(image_bytes, media_type)
     # Vision transcription doesn't expose a native confidence score; 0.85
     # reflects "generally reliable but not a guaranteed-exact text layer",
     # consistent with the pdfplumber fallback tier below.
     return text, 0.85 if text.strip() else 0.0
+
+
+def _extract_pdf_with_vision(file_path: str) -> str:
+    """Renders each PDF page to an image and OCRs it with the vision model -
+    the fallback for scanned/photographed PDFs (e.g. an image exported or
+    printed to PDF) that have no real text layer for pypdf/pdfplumber to read."""
+    pdf = pdfium.PdfDocument(file_path)
+    try:
+        page_texts = []
+        for i in range(min(len(pdf), MAX_VISION_PDF_PAGES)):
+            bitmap = pdf[i].render(scale=2.0)
+            buf = io.BytesIO()
+            bitmap.to_pil().save(buf, format="PNG")
+            page_texts.append(_call_vision_model(buf.getvalue(), "image/png"))
+        return "\n\n".join(t for t in page_texts if t.strip())
+    finally:
+        pdf.close()
 
 
 def _extract_with_pypdf(file_path: str) -> tuple[str, int]:
@@ -105,9 +122,22 @@ def extract_text(file_path: str) -> tuple[str, float]:
     try:
         fallback_text, fallback_pages = _extract_with_pdfplumber(file_path)
         if len(fallback_text) > len(text):
-            quality = 0.75 if fallback_pages and len(fallback_text) / fallback_pages >= MIN_CHARS_PER_PAGE else 0.4
-            return fallback_text, quality
+            text, page_count = fallback_text, fallback_pages
     except Exception as exc:  # noqa: BLE001
         logger.warning("pdfplumber fallback failed: %s", exc)
+
+    if page_count and len(text) / page_count >= MIN_CHARS_PER_PAGE:
+        return text, 0.75
+
+    # Both text-layer extractors came back empty/near-empty - this is very
+    # likely a scanned/photographed document with no real text layer (e.g.
+    # an image exported to PDF). Render the pages and OCR them with the
+    # vision model, same as a native image upload.
+    try:
+        vision_text = _extract_pdf_with_vision(file_path)
+        if vision_text.strip():
+            return vision_text, 0.85
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("PDF vision OCR fallback failed: %s", exc)
 
     return text, 0.3 if text.strip() else 0.0
