@@ -18,10 +18,8 @@ services:
         sync: false
       - key: CLOUD_LLM_MODEL
         value: llama-3.3-70b-versatile
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: ANTHROPIC_VISION_MODEL
-        value: claude-sonnet-5
+      - key: VISION_MODEL
+        value: meta-llama/llama-4-scout-17b-16e-instruct
       - key: CHROMA_PATH
         value: /app/data/chroma
       - key: UPLOAD_DIR
