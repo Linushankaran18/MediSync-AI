@@ -27,10 +27,11 @@ class Settings(BaseSettings):
     # Vision OCR: uploaded images (scanned/photographed prescriptions, lab
     # reports) have no text layer for pypdf/pdfplumber to read, and classic
     # OCR (Tesseract) handles handwriting and mixed-language text poorly. A
-    # vision-capable LLM transcribes the image directly instead - reuses
-    # CLOUD_LLM_API_KEY (same Groq account as the main LLM), just a
-    # different (multimodal) model.
-    VISION_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    # vision-capable LLM transcribes the image directly instead. Groq has no
+    # vision model available on this account (checked via /models - text/
+    # audio only), so this is a separate Anthropic key.
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_VISION_MODEL: str = "claude-sonnet-5"
 
     # Embeddings / vector store
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"

@@ -2,15 +2,16 @@
 files are read directly (used by the demo sample docs). Scanned/photographed
 images (.png/.jpg/.jpeg) have no text layer for pypdf/pdfplumber to read, and
 classic OCR (Tesseract) handles handwriting and mixed-language text poorly -
-those go through Groq's hosted vision model (multimodal Llama 4 Scout, same
-Groq account/key as the main cloud LLM) which transcribes the image directly
-instead."""
+those go through a vision-capable LLM (Claude) that transcribes the image
+directly instead. (Groq was tried first since it's the same account as the
+main LLM, but Groq currently has no vision/multimodal model available - its
+/models list is text/audio only - so this uses a separate Anthropic key.)"""
 import base64
 import logging
 import os
 
 import pdfplumber
-from groq import Groq
+from anthropic import Anthropic
 from pypdf import PdfReader
 
 from app.core.config import settings
@@ -29,14 +30,14 @@ VISION_OCR_PROMPT = (
     "Output only the transcribed text, with no summary, explanation, or commentary."
 )
 
-_groq_vision_client: Groq | None = None
+_anthropic_client: Anthropic | None = None
 
 
-def _get_groq_vision_client() -> Groq:
-    global _groq_vision_client
-    if _groq_vision_client is None:
-        _groq_vision_client = Groq(api_key=settings.CLOUD_LLM_API_KEY)
-    return _groq_vision_client
+def _get_anthropic_client() -> Anthropic:
+    global _anthropic_client
+    if _anthropic_client is None:
+        _anthropic_client = Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    return _anthropic_client
 
 
 def _extract_with_vision(file_path: str) -> tuple[str, float]:
@@ -44,24 +45,25 @@ def _extract_with_vision(file_path: str) -> tuple[str, float]:
     media_type = _MEDIA_TYPES.get(ext, "image/png")
     with open(file_path, "rb") as f:
         image_b64 = base64.b64encode(f.read()).decode("utf-8")
-    data_url = f"data:{media_type};base64,{image_b64}"
 
-    client = _get_groq_vision_client()
-    response = client.chat.completions.create(
-        model=settings.VISION_MODEL,
-        temperature=0.0,
+    client = _get_anthropic_client()
+    response = client.messages.create(
+        model=settings.ANTHROPIC_VISION_MODEL,
         max_tokens=2000,
         messages=[
             {
                 "role": "user",
                 "content": [
+                    {
+                        "type": "image",
+                        "source": {"type": "base64", "media_type": media_type, "data": image_b64},
+                    },
                     {"type": "text", "text": VISION_OCR_PROMPT},
-                    {"type": "image_url", "image_url": {"url": data_url}},
                 ],
             }
         ],
     )
-    text = response.choices[0].message.content or ""
+    text = "".join(block.text for block in response.content if block.type == "text")
     # Vision transcription doesn't expose a native confidence score; 0.85
     # reflects "generally reliable but not a guaranteed-exact text layer",
     # consistent with the pdfplumber fallback tier below.
