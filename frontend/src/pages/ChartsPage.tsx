@@ -33,13 +33,18 @@ export default function ChartsPage() {
           </button>
         ))}
       </div>
-      {trend && (
+      {trend && trend.points.length > 0 ? (
         <div className="bg-white rounded-xl border p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold">{trend.test_name}</h2>
             <span className="text-sm capitalize px-2 py-1 bg-slate-100 rounded">{trend.trend}</span>
           </div>
           <LabChart points={trend.points} />
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border p-6 text-center text-slate-500 text-sm">
+          No {tests.find((t) => t.key === selected)?.label.toLowerCase()} results yet for this patient.
+          Upload a lab report that includes this test to see its trend here.
         </div>
       )}
     </div>

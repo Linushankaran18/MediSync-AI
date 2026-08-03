@@ -1,15 +1,21 @@
 import { useCallback, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { isAxiosError } from 'axios';
 import { dataApi } from '../api/client';
 
 interface UploadStatus {
   name: string;
   status: 'pending' | 'uploading' | 'done' | 'error';
   message?: string;
+  alertsTriggered?: string[];
 }
 
 export default function UploadPage() {
   const [files, setFiles] = useState<UploadStatus[]>([]);
   const [dragging, setDragging] = useState(false);
+
+  const allDone = files.length > 0 && files.every((f) => f.status === 'done' || f.status === 'error');
+  const totalAlerts = files.reduce((sum, f) => sum + (f.alertsTriggered?.length ?? 0), 0);
 
   const uploadFiles = useCallback(async (fileList: FileList | File[]) => {
     const arr = Array.from(fileList);
@@ -23,12 +29,15 @@ export default function UploadPage() {
         const { data } = await dataApi.upload(arr[i]);
         setFiles((prev) =>
           prev.map((f, idx) =>
-            idx === i ? { ...f, status: 'done', message: data.message } : f,
+            idx === i
+              ? { ...f, status: 'done', message: data.message, alertsTriggered: data.alerts_triggered }
+              : f,
           ),
         );
-      } catch {
+      } catch (err) {
+        const detail = isAxiosError(err) ? (err.response?.data as { detail?: string } | undefined)?.detail : undefined;
         setFiles((prev) =>
-          prev.map((f, idx) => (idx === i ? { ...f, status: 'error', message: 'Upload failed' } : f)),
+          prev.map((f, idx) => (idx === i ? { ...f, status: 'error', message: detail || 'Upload failed' } : f)),
         );
       }
     }
@@ -71,7 +80,7 @@ export default function UploadPage() {
           {files.map((f) => (
             <div key={f.name} className="bg-white border rounded-lg p-3 flex justify-between items-center">
               <span className="text-sm">{f.name}</span>
-              <span className={`text-xs font-medium ${
+              <span className={`text-xs font-medium text-right ${
                 f.status === 'done' ? 'text-green-600' :
                 f.status === 'error' ? 'text-red-600' :
                 f.status === 'uploading' ? 'text-blue-600' : 'text-slate-400'
@@ -80,6 +89,27 @@ export default function UploadPage() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {allDone && (
+        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-semibold text-slate-900">
+              {files.filter((f) => f.status === 'done').length} of {files.length} file(s) processed
+            </p>
+            <p className="text-sm text-slate-600">
+              {totalAlerts > 0
+                ? `${totalAlerts} safety alert(s) triggered - review them on the dashboard.`
+                : 'No safety alerts triggered so far.'}
+            </p>
+          </div>
+          <Link
+            to="/dashboard"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 whitespace-nowrap"
+          >
+            View Dashboard →
+          </Link>
         </div>
       )}
     </div>

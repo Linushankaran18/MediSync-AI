@@ -28,7 +28,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/" element={<PrivateRoute><UploadPage /></PrivateRoute>} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/upload" element={<PrivateRoute><UploadPage /></PrivateRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
       <Route path="/timeline" element={<PrivateRoute><TimelinePage /></PrivateRoute>} />
       <Route path="/charts" element={<PrivateRoute><ChartsPage /></PrivateRoute>} />

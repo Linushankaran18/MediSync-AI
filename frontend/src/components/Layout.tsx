@@ -1,17 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
+import { dataApi } from '../api/client';
 
 const links = [
-  { to: '/', label: 'Upload' },
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/upload', label: 'Upload' },
   { to: '/timeline', label: 'Timeline' },
-  { to: '/charts', label: 'Charts' },
-  { to: '/chat', label: 'Chat' },
+  { to: '/charts', label: 'Trends' },
+  { to: '/chat', label: 'Ask AI' },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { patientName, logout } = useAuth();
   const location = useLocation();
+  const { data: alerts } = useQuery({ queryKey: ['alerts'], queryFn: () => dataApi.alerts().then((r) => r.data) });
+  const activeAlertCount = alerts?.filter((a) => !a.resolved).length ?? 0;
 
   return (
     <div className="min-h-screen">
@@ -24,11 +28,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={l.to}
                   to={l.to}
-                  className={`text-sm font-medium ${
+                  className={`relative text-sm font-medium ${
                     location.pathname === l.to ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'
                   }`}
                 >
                   {l.label}
+                  {l.to === '/dashboard' && activeAlertCount > 0 && (
+                    <span className="absolute -top-2 -right-3 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                      {activeAlertCount}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

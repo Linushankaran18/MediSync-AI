@@ -78,6 +78,14 @@ export interface ChatResponse {
   disclaimer: string;
 }
 
+export interface UploadResult {
+  message: string;
+  document_id: string;
+  doc_type: string;
+  ocr_quality: number;
+  alerts_triggered: string[];
+}
+
 export const authApi = {
   register: (email: string, password: string, name: string) =>
     api.post<TokenResponse>('/auth/register', { email, password, name }),
@@ -89,7 +97,7 @@ export const dataApi = {
   upload: (file: File) => {
     const form = new FormData();
     form.append('file', file);
-    return api.post('/upload', form);
+    return api.post<UploadResult>('/upload', form);
   },
   documents: () => api.get<Document[]>('/documents'),
   timeline: () => api.get<TimelineEvent[]>('/timeline'),
