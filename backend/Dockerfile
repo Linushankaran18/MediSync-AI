@@ -22,4 +22,9 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 COPY . .
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run migrations before serving - Render's Docker deploy has no separate
+# "release" step, so without this the container starts against a table-less
+# database every time (the exact "relation users does not exist" issue we
+# hit locally against a fresh Supabase DB) unless someone remembers to run
+# `alembic upgrade head` by hand after every deploy.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

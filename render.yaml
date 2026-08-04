@@ -25,7 +25,9 @@ services:
       - key: CHROMA_PATH
         value: /app/data/chroma
       - key: UPLOAD_DIR
-        value: /app/uploads
+        value: /app/data/uploads
+      - key: FRONTEND_ORIGIN
+        sync: false
     disk:
       name: medisync-data
       mountPath: /app/data
