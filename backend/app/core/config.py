@@ -39,8 +39,19 @@ class Settings(BaseSettings):
     # Storage
     UPLOAD_DIR: str = "./uploads"
 
-    # CORS
+    # CORS - comma-separated if you need more than one (e.g. a Vercel
+    # production domain + preview deployments, or prod + localhost during
+    # dev). CORS origin matching is an exact string match against the
+    # browser's Origin header, which never has a trailing slash or path -
+    # a pasted value like "https://foo.vercel.app/" (trailing slash) or
+    # " https://foo.vercel.app" (stray space) silently never matches and
+    # looks identical to a CORS misconfiguration, so this is normalized here
+    # rather than trusting the raw env var.
     FRONTEND_ORIGIN: str = "http://localhost:5173"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip().rstrip("/") for origin in self.FRONTEND_ORIGIN.split(",") if origin.strip()]
 
 
 @lru_cache
