@@ -22,13 +22,17 @@ services:
         sync: false
       - key: GEMINI_VISION_MODEL
         value: gemini-3.6-flash
+      # No persistent disk on the free tier - these live on the container's
+      # ephemeral filesystem, so Chroma embeddings and raw uploaded files are
+      # wiped on every restart/redeploy/spin-down. Structured data (documents,
+      # medications, labs, alerts, timeline) is unaffected since that all
+      # lives in Supabase Postgres via DATABASE_URL - only RAG chat evidence
+      # and file re-download for anything uploaded before a restart would be
+      # gone. Fine for a live demo (everything's uploaded fresh in-session);
+      # upgrade to a paid plan + re-add a `disk:` block for real persistence.
       - key: CHROMA_PATH
-        value: /app/data/chroma
+        value: ./chroma_data
       - key: UPLOAD_DIR
-        value: /app/data/uploads
+        value: ./uploads
       - key: FRONTEND_ORIGIN
         sync: false
-    disk:
-      name: medisync-data
-      mountPath: /app/data
-      sizeGB: 1
