@@ -4,7 +4,8 @@ __pycache__/
 .venv/
 venv/
 uploads/
-data/
+/data/
+chroma_data/
 *.egg-info/
 dist/
 node_modules/

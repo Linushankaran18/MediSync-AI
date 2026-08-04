@@ -1,0 +1,12 @@
+[
+  {"drug_a": "warfarin", "drug_b": "aspirin", "severity": "major", "description": "Increased bleeding risk"},
+  {"drug_a": "warfarin", "drug_b": "ibuprofen", "severity": "major", "description": "Increased bleeding risk"},
+  {"drug_a": "metformin", "drug_b": "contrast dye", "severity": "major", "description": "Risk of lactic acidosis"},
+  {"drug_a": "lisinopril", "drug_b": "potassium", "severity": "major", "description": "Hyperkalemia risk"},
+  {"drug_a": "simvastatin", "drug_b": "gemfibrozil", "severity": "major", "description": "Rhabdomyolysis risk"},
+  {"drug_a": "methotrexate", "drug_b": "aspirin", "severity": "major", "description": "Increased methotrexate toxicity"},
+  {"drug_a": "fluoxetine", "drug_b": "tramadol", "severity": "major", "description": "Serotonin syndrome risk"},
+  {"drug_a": "amlodipine", "drug_b": "simvastatin", "severity": "minor", "description": "Increased statin levels"},
+  {"drug_a": "metoprolol", "drug_b": "verapamil", "severity": "major", "description": "Bradycardia risk"},
+  {"drug_a": "clopidogrel", "drug_b": "omeprazole", "severity": "minor", "description": "Reduced antiplatelet effect"}
+]
