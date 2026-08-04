@@ -18,7 +18,7 @@ export default function DashboardPage() {
   if (!isLoading && documents?.length === 0) {
     return (
       <div className="text-center py-16">
-        <h1 className="text-2xl font-bold mb-2">Welcome to MedIntel AI</h1>
+        <h1 className="text-2xl font-bold mb-2">Welcome to MediSync AI</h1>
         <p className="text-slate-500 mb-6 max-w-md mx-auto">
           Upload a prescription, lab report, or discharge summary to build your medical
           timeline and start catching drug interactions, allergy conflicts, and lab trends.
@@ -66,9 +66,16 @@ export default function DashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold">Recent Documents</h2>
-          <Link to="/upload" className="text-sm font-medium text-blue-600 hover:underline">
-            + Upload more
-          </Link>
+          <div className="flex items-center gap-4">
+            {documents && documents.length > 0 && (
+              <Link to="/documents" className="text-sm font-medium text-blue-600 hover:underline">
+                Manage all →
+              </Link>
+            )}
+            <Link to="/upload" className="text-sm font-medium text-blue-600 hover:underline">
+              + Upload more
+            </Link>
+          </div>
         </div>
         <div className="bg-white rounded-xl border divide-y">
           {documents?.length ? documents.slice(0, 5).map((d) => (

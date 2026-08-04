@@ -70,7 +70,19 @@ def _existing_signatures(db: Session, patient_id, alert_type: str) -> set[tuple]
         elif alert_type == "allergy":
             sigs.add((d.get("allergen", "").lower(), d.get("medication", "").lower()))
         elif alert_type in ("duplicate_prescription", "dosage_conflict"):
-            sigs.add((d.get("medication", "").lower(), d.get("dose_a"), d.get("dose_b")))
+            # Normalize exactly like the fresh signature below (lower+strip,
+            # None -> "") - these are stored in original case for display,
+            # so comparing raw would never match the freshly-computed sig and
+            # every upload would re-insert the same conflict as a "new" alert.
+            sigs.add(
+                (
+                    d.get("medication", "").lower(),
+                    (d.get("dose_a") or "").strip().lower(),
+                    (d.get("dose_b") or "").strip().lower(),
+                    (d.get("frequency_a") or "").strip().lower(),
+                    (d.get("frequency_b") or "").strip().lower(),
+                )
+            )
         elif alert_type == "lab_trend":
             sigs.add((d.get("test_name", "").lower(), d.get("trend")))
     return sigs
@@ -157,9 +169,19 @@ def check_duplicate_and_dosage(db: Session, patient_id, document_id) -> list[Ale
                 continue
 
             dose_a, dose_b = (med_a.dose or "").strip().lower(), (med_b.dose or "").strip().lower()
-            is_duplicate = dose_a == dose_b
+            # Many real prescriptions (including the judges' sample set) only
+            # encode strength+timing as a single "frequency" string (e.g. "1
+            # Morning, 1 Night") with no separate dose/strength value - if a
+            # conflict only shows up in frequency, comparing dose alone would
+            # miss it and misfile a real dosage conflict as a plain duplicate.
+            freq_a, freq_b = (med_a.frequency or "").strip().lower(), (med_b.frequency or "").strip().lower()
+            is_duplicate = dose_a == dose_b and freq_a == freq_b
             alert_type = "duplicate_prescription" if is_duplicate else "dosage_conflict"
-            sig = (name, None, None) if is_duplicate else (name, dose_a, dose_b)
+            # "" (not None) for the unused slots on a duplicate match, to stay
+            # consistent with how _existing_signatures normalizes missing
+            # dose_a/dose_b/frequency_a/frequency_b back to "" when re-read
+            # from a stored alert that never set those keys.
+            sig = (name, "", "", "", "") if is_duplicate else (name, dose_a, dose_b, freq_a, freq_b)
             already_seen = seen_dup if is_duplicate else seen_dosage
 
             if sig in already_seen or sig in seen_this_run:
@@ -177,6 +199,11 @@ def check_duplicate_and_dosage(db: Session, patient_id, document_id) -> list[Ale
                     )
                 )
             else:
+                mismatches = []
+                if dose_a != dose_b:
+                    mismatches.append(f"dose '{med_a.dose or 'unspecified'}' vs '{med_b.dose or 'unspecified'}'")
+                if freq_a != freq_b:
+                    mismatches.append(f"frequency '{med_a.frequency or 'unspecified'}' vs '{med_b.frequency or 'unspecified'}'")
                 alerts.append(
                     Alert(
                         patient_id=patient_id,
@@ -187,7 +214,9 @@ def check_duplicate_and_dosage(db: Session, patient_id, document_id) -> list[Ale
                             "medication": med_a.name,
                             "dose_a": med_a.dose,
                             "dose_b": med_b.dose,
-                            "description": "Same medication prescribed at different doses in overlapping windows.",
+                            "frequency_a": med_a.frequency,
+                            "frequency_b": med_b.frequency,
+                            "description": f"Same medication prescribed with different instructions in overlapping windows: {'; '.join(mismatches)}.",
                         },
                     )
                 )

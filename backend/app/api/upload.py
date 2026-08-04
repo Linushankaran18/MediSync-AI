@@ -45,6 +45,7 @@ def upload_document(
     document = Document(
         patient_id=patient.id,
         filename=file.filename,
+        file_path=stored_path,
         doc_type=extracted.doc_type,
         raw_text=raw_text,
         ocr_quality=ocr_quality,

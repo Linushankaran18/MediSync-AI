@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token, hash_password
@@ -28,12 +29,22 @@ def _get_or_create_dev_user(db: Session) -> User:
     user = db.query(User).filter(User.email == DEV_USER_EMAIL).first()
     if user:
         return user
+    # Concurrent requests (e.g. the frontend firing several calls on load)
+    # can race here: two requests both see no user and both try to insert.
+    # The loser hits a duplicate-key IntegrityError - recover by rolling
+    # back and re-fetching the row the winner created, instead of 500ing.
     user = User(email=DEV_USER_EMAIL, password_hash=hash_password(uuid.uuid4().hex))
     db.add(user)
-    db.flush()
-    db.add(Patient(user_id=user.id, name=DEV_PATIENT_NAME))
-    db.commit()
-    db.refresh(user)
+    try:
+        db.flush()
+        db.add(Patient(user_id=user.id, name=DEV_PATIENT_NAME))
+        db.commit()
+        db.refresh(user)
+    except IntegrityError:
+        db.rollback()
+        user = db.query(User).filter(User.email == DEV_USER_EMAIL).first()
+        if not user:
+            raise
     return user
 
 

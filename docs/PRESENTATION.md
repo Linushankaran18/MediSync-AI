@@ -1,8 +1,8 @@
-# MedIntel AI — Presentation Script (4-5 minutes)
+# MediSync AI — Presentation Script (4-5 minutes)
 
 ## Slide 1: Title (30 sec)
 
-"MedIntel AI — an AI-powered medical document intelligence platform. We turn scattered PDFs into structured insights, safety alerts, and evidence-backed answers."
+"MediSync AI — an AI-powered medical document intelligence platform. We turn scattered PDFs into structured insights, safety alerts, and evidence-backed answers."
 
 ## Slide 2: The Problem (30 sec)
 
@@ -40,7 +40,7 @@
 
 ## Slide 9: Closing (15 sec)
 
-"MedIntel AI demonstrates production-quality architecture — deterministic safety rules plus AI explanation. Not a hackathon prototype, but a foundation for real medical document intelligence."
+"MediSync AI demonstrates production-quality architecture — deterministic safety rules plus AI explanation. Not a hackathon prototype, but a foundation for real medical document intelligence."
 
 ## Q&A Prep
 

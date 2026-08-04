@@ -14,6 +14,11 @@ class Document(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=gen_uuid)
     patient_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("patients.id"), index=True)
     filename: Mapped[str] = mapped_column(String(500))
+    # Path to the stored file on disk (uploads/<uuid><ext>) - distinct from
+    # `filename`, which keeps the user's original name for display. Needed so
+    # a document delete can also remove the underlying file. Nullable because
+    # documents created before this column existed have no stored path.
+    file_path: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     doc_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     ocr_quality: Mapped[float | None] = mapped_column(Float, nullable=True)

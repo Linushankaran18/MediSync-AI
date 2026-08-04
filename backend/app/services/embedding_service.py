@@ -56,6 +56,14 @@ def ingest_document(patient_id, document_id, doc_type: str | None, visit_date, r
     return len(chunks)
 
 
+def delete_document_embeddings(document_id) -> None:
+    """Remove every chunk embedding belonging to a document (ids are
+    `<document_id>:<chunk_index>`, and metadata also carries document_id, so
+    a metadata filter deletes them all in one call)."""
+    collection = get_collection()
+    collection.delete(where={"document_id": str(document_id)})
+
+
 def query_patient_documents(patient_id, question: str, n_results: int = 5) -> list[dict]:
     collection = get_collection()
     query_embedding = embed_query(question)

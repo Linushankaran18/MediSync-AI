@@ -1,8 +1,8 @@
-# MedIntel AI — Technical Report
+# MediSync AI — Technical Report
 
 ## 1. Executive Summary
 
-MedIntel AI is an AI-powered medical document intelligence platform that transforms unstructured medical PDFs into structured patient data, safety alerts, timelines, and evidence-backed conversational answers. The system separates **deterministic medical logic** (rule engine) from **AI reasoning** (LLM for extraction and explanation), producing a production-quality architecture suitable for real-world healthcare document management.
+MediSync AI is an AI-powered medical document intelligence platform that transforms unstructured medical PDFs into structured patient data, safety alerts, timelines, and evidence-backed conversational answers. The system separates **deterministic medical logic** (rule engine) from **AI reasoning** (LLM for extraction and explanation), producing a production-quality architecture suitable for real-world healthcare document management.
 
 ## 2. Problem Statement
 

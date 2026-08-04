@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UploadPage from './pages/UploadPage';
 import DashboardPage from './pages/DashboardPage';
+import DocumentsPage from './pages/DocumentsPage';
 import TimelinePage from './pages/TimelinePage';
 import ChartsPage from './pages/ChartsPage';
 import ChatPage from './pages/ChatPage';
@@ -31,6 +32,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/upload" element={<PrivateRoute><UploadPage /></PrivateRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+      <Route path="/documents" element={<PrivateRoute><DocumentsPage /></PrivateRoute>} />
       <Route path="/timeline" element={<PrivateRoute><TimelinePage /></PrivateRoute>} />
       <Route path="/charts" element={<PrivateRoute><ChartsPage /></PrivateRoute>} />
       <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />

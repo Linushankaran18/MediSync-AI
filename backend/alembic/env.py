@@ -12,7 +12,11 @@ from app.database.postgres import Base  # noqa: E402
 import app.models  # noqa: E402,F401  (ensures all models are registered on Base.metadata)
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# ConfigParser (which alembic's Config wraps) treats "%" as its own
+# interpolation syntax, so a URL-encoded password like "...%40..." needs
+# its "%" doubled to "%%" before being stored, or set_main_option raises
+# "invalid interpolation syntax".
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

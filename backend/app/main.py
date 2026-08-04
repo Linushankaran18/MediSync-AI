@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import alerts, auth, chat, documents, report, timeline, upload
 from app.core.config import settings
 
-app = FastAPI(title="MedIntel AI", version="0.1.0")
+app = FastAPI(title="MediSync AI", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

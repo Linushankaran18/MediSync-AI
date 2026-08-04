@@ -100,6 +100,7 @@ export const dataApi = {
     return api.post<UploadResult>('/upload', form);
   },
   documents: () => api.get<Document[]>('/documents'),
+  deleteDocument: (id: string) => api.delete<void>(`/documents/${id}`),
   timeline: () => api.get<TimelineEvent[]>('/timeline'),
   alerts: () => api.get<Alert[]>('/alerts'),
   summary: () => api.get<Summary>('/summary'),

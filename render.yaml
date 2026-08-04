@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: medintel-backend
+    name: medisync-backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
@@ -27,6 +27,6 @@ services:
       - key: UPLOAD_DIR
         value: /app/uploads
     disk:
-      name: medintel-data
+      name: medisync-data
       mountPath: /app/data
       sizeGB: 1

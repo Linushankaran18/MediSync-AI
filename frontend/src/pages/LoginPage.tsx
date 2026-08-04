@@ -4,7 +4,7 @@ import { authApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('demo@medintel.ai');
+  const [email, setEmail] = useState('demo@medisync.ai');
   const [password, setPassword] = useState('demo1234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="bg-white rounded-xl shadow-sm border p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-blue-600 mb-1">MedIntel AI</h1>
+        <h1 className="text-2xl font-bold text-blue-600 mb-1">MediSync AI</h1>
         <p className="text-slate-500 mb-6">Medical Document Intelligence</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

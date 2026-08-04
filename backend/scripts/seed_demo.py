@@ -1,4 +1,4 @@
-"""Seed demo account and sample medical data for MedIntel AI."""
+"""Seed demo account and sample medical data for MediSync AI."""
 
 import uuid
 from datetime import date, datetime, timezone
@@ -21,14 +21,14 @@ from app.models import (
 def seed():
     db = SessionLocal()
     try:
-        existing = db.query(User).filter(User.email == "demo@medintel.ai").first()
+        existing = db.query(User).filter(User.email == "demo@medisync.ai").first()
         if existing:
             print("Demo account already exists. Skipping seed.")
             return
 
         user = User(
             id=uuid.uuid4(),
-            email="demo@medintel.ai",
+            email="demo@medisync.ai",
             password_hash=hash_password("demo1234"),
         )
         db.add(user)
@@ -171,7 +171,7 @@ def seed():
         )
 
         db.commit()
-        print("Demo account seeded: demo@medintel.ai / demo1234")
+        print("Demo account seeded: demo@medisync.ai / demo1234")
     finally:
         db.close()
 

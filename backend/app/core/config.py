@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     # Database (Postgres in prod/Docker; sqlite is only used for local
     # unit-testing convenience since the Uuid column type is portable)
-    DATABASE_URL: str = "postgresql://medintel:medintel@localhost:5432/medintel"
+    DATABASE_URL: str = "postgresql://medisync:medisync@localhost:5432/medisync"
 
     # Auth
     JWT_SECRET: str = "dev-secret-change-me"

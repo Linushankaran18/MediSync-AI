@@ -1,4 +1,4 @@
-# MedIntel AI
+# MediSync AI
 
 Patient document intelligence: upload prescriptions/lab reports/discharge summaries/doctor
 notes, get structured extraction, drug-interaction & allergy alerts, a chronological
@@ -38,7 +38,7 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp ../.env.example .env
 alembic upgrade head
-python scripts/seed_demo.py   # optional: demo@medintel.ai / demo1234
+python scripts/seed_demo.py   # optional: demo@medisync.ai / demo1234
 uvicorn app.main:app --reload --port 8000
 ```
 
